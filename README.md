@@ -7,6 +7,8 @@ A database of every school in Kenya, from nursery (PP1) to university, with a si
 
 It uses plain Python 3 (standard library only) and a single SQLite file, with no build step and nothing to install.
 
+**Live:** https://kenya-school-crm.vercel.app — `ui/` is the static front end and `api/index.py` runs the same API handler as the local server (`harvest/server.py`) as a Vercel Python function. Environment variables (names only): `APP_PASSWORD`, `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`; see *Configuration* below for the rest.
+
 ## Quick start
 
 ```bash
