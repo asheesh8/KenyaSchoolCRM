@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sierra Leone Schools</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231E5A3A'/%3E%3Cpath d='M7 22h4v-5H7zM14 22h4V12h-4zM21 22h4V8h-4z' fill='%23F7F8F4'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="login" class="login" hidden>
+    <form class="login-card" id="login-form">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <h1>Sierra Leone Schools</h1>
+      <p class="muted">Sign in to see Sierra Leone's schools and your outreach.</p>
+      <label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" required autofocus>
+      <p class="error" id="login-error" role="alert"></p>
+      <button class="btn primary" type="submit">Sign in</button>
+    </form>
+  </div>
+
+  <div id="app" class="app" hidden>
+    <nav class="rail" aria-label="Main">
+      <a class="brand" href="#/overview" title="Sierra Leone Schools">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <span class="brand-name">Sierra Leone Schools</span>
+      </a>
+      <a href="#/overview" data-view="overview"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6V11h-6zM4 20h6v-4H4zM14 4v4h6V4z"/></svg><span>Home</span></a>
+      <a href="#/schools" data-view="schools"><svg viewBox="0 0 24 24"><path d="M3 10 12 4l9 6M5 10v9h14v-9M10 19v-5h4v5"/></svg><span>Find schools</span></a>
+      <a href="#/outreach" data-view="outreach"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3zM3 7l9 6 9-6"/></svg><span>Email outreach</span></a>
+      <a href="#/pipeline" data-view="pipeline"><svg viewBox="0 0 24 24"><path d="M4 5h4v14H4zM10 5h4v9h-4zM16 5h4v5h-4z"/></svg><span>Progress</span></a>
+      <a href="#/data" data-view="data"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg><span>About the data</span></a>
+      <div class="rail-foot">
+        <button class="linklike" id="theme-toggle">Dark screen</button>
+        <button class="linklike" id="logout" hidden>Sign out</button>
+      </div>
+    </nav>
+
+    <main id="main">
+      <section id="view-overview" class="view" hidden></section>
+      <section id="view-schools" class="view view-schools" hidden>
+        <aside class="filters" id="filters" aria-label="Filters"></aside>
+        <div class="results">
+          <header class="results-head">
+            <div class="search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+              <input id="q" type="search" placeholder="Search by school, town, chiefdom, email or head" aria-label="Search" autocomplete="off">
+              <kbd>/</kbd>
+            </div>
+            <div class="results-tools">
+              <button class="btn ghost only-narrow" id="show-filters">Filters</button>
+              <label class="sort">Sort
+                <select id="sort">
+                  <option value="best">Has email first</option>
+                  <option value="name">Name</option>
+                  <option value="district">District</option>
+                  <option value="status">Stage</option>
+                  <option value="touched">Last activity</option>
+                </select>
+              </label>
+              <a class="btn ghost" id="export" href="#">Download list (Excel)</a>
+            </div>
+          </header>
+          <div class="chips" id="active-chips"></div>
+          <div class="count-line"><span id="count"></span><span id="bulk"></span></div>
+          <div class="table-wrap">
+            <table class="schools" id="table">
+              <thead><tr>
+                <th class="c-check"><input type="checkbox" id="check-all" aria-label="Select all on this page"></th>
+                <th>School</th><th>Where</th><th>Email and phone</th><th>Head / official</th><th>Stage</th>
+              </tr></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="pager"></div>
+        </div>
+      </section>
+      <section id="view-outreach" class="view" hidden></section>
+      <section id="view-pipeline" class="view" hidden></section>
+      <section id="view-data" class="view" hidden></section>
+    </main>
+
+    <aside class="drawer" id="drawer" aria-label="School record" hidden></aside>
+  </div>
+
+  <dialog class="modal" id="modal"></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

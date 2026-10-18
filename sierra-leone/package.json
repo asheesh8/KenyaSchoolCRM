@@ -1,0 +1,16 @@
+{
+  "name": "sierra-leone-schools-directory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Directory + CRM of Sierra Leone's schools and education offices, with a 7-account email sequence.",
+  "scripts": {
+    "dev": "python3 -m slcrm serve",
+    "merge": "python3 -m slcrm merge",
+    "load": "python3 -m slcrm load",
+    "osm": "python3 -m slcrm osm",
+    "crawl": "python3 -m slcrm crawl",
+    "send": "python3 -m slcrm send",
+    "stats": "python3 -m slcrm stats",
+    "test": "python3 -m unittest discover tests"
+  }
+}

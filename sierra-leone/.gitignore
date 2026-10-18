@@ -1,0 +1,6 @@
+data/
+.env
+# The merged contact data stays out of this public repository (it names people).
+# It lives in the project folder; copy it here or point SLCRM_DATASET at it.
+dataset/*
+!dataset/SCHEMA.md
