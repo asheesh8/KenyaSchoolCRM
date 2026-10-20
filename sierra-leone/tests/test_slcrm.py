@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 os.environ.setdefault("SECRET_KEY", "test-secret")
 
-from slcrm import config, db, importer, levels, mailer, mbsse  # noqa: E402
+from slcrm import config, db, importer, levels, mailer, mbsse, schoollist  # noqa: E402
 
 MONDAY_10AM = 1760954400.0  # Mon 2025-10-20 10:00 GMT
 
@@ -90,6 +90,44 @@ class Mbsse(unittest.TestCase):
         rows = mbsse.parse(html, mbsse.page_district(html))
         self.assertEqual(rows, [{"emis": "139100001", "name": "Example Primary School", "district": "Kono",
                                  "chiefdom": "Gbense", "town": "Koidu", "headcount": 1250}])
+
+
+class SchoolList(unittest.TestCase):
+    TEXT = """emis_num   Level     Region   Council          Chfdom   School Name                         Town      phone       owner
+110101206  Primary   East     Kailahun DC      1        Roman Catholic Primary School       Sienga    076484775   Mission
+110101207  Primary   East     Kailahun DC      1        Community Primary School            Gbahama   79175290    Community
+Page 1 of 9"""
+
+    def test_parse_rows(self):
+        rows = schoollist.parse(self.TEXT)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual((rows[0]["name"], rows[0]["town"], rows[0]["district"], rows[0]["phone"], rows[0]["owner"]),
+                         ("Roman Catholic Primary School", "Sienga", "Kailahun", "+232 76 484 775", "mission"))
+        self.assertEqual(rows[1]["phone"], "+232 79 175 290")
+
+    def test_ingest_matches_by_emis_and_adds_phone(self):
+        fd, path = tempfile.mkstemp(suffix=".db")
+        os.close(fd)
+        tmp = Path(tempfile.mkdtemp())
+        c = db.connect(path)
+        t = db.now()
+        c.execute("INSERT INTO schools(name, norm, levels, district, emis_code, created_at, updated_at) "
+                  "VALUES ('R.C. Primary School Sienga', 'rc primary school sienga', 2, 'Kailahun', '110101206', ?, ?)",
+                  (t, t))
+        old_cache, old_text = config.CACHE, schoollist.pdf_text
+        config.CACHE, schoollist.pdf_text = tmp, lambda p: self.TEXT
+        try:
+            (tmp / "list.pdf").write_bytes(b"%PDF")
+            st = schoollist.ingest(c, urls=["https://example.org/list.pdf"], out=tmp / "out.jsonl")
+        finally:
+            config.CACHE, schoollist.pdf_text = old_cache, old_text
+        self.assertEqual((st["rows"], st["matched"], st["added"], st["with_phone"]), (2, 1, 1, 2))
+        self.assertEqual(c.execute("SELECT COUNT(*) FROM schools").fetchone()[0], 2)
+        self.assertEqual(c.execute("SELECT phone FROM schools WHERE emis_code='110101206'").fetchone()[0],
+                         "+232 76 484 775")
+        self.assertEqual(len((tmp / "out.jsonl").read_text().splitlines()), 2)
+        c.close()
+        os.unlink(path)
 
 
 class Mailer(unittest.TestCase):

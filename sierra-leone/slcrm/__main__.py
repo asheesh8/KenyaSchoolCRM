@@ -25,6 +25,11 @@ def cmd_mbsse(args):
     print(json.dumps(mbsse.ingest(db.connect(), only=args.levels.split(",") if args.levels else None)))
 
 
+def cmd_schoollist(args):
+    from . import schoollist
+    print(json.dumps(schoollist.ingest(db.connect(), urls=args.url or None), indent=2))
+
+
 def cmd_osm(args):
     from . import osm
     print(json.dumps(osm.ingest(db.connect())))
@@ -108,6 +113,9 @@ def main(argv=None):
     p = sub.add_parser("mbsse", help="read the Ministry's published school lists (needs internet)")
     p.add_argument("--levels", help="pre_primary,primary,junior_secondary,senior_secondary (default all)")
     p.set_defaults(func=cmd_mbsse)
+    p = sub.add_parser("schoollist", help="read the Ministry's 2016/2017 EMIS school-list PDFs for phones (needs internet)")
+    p.add_argument("--url", action="append", help="a school-list PDF URL (repeatable; default the 2016 and 2017 lists)")
+    p.set_defaults(func=cmd_schoollist)
     sub.add_parser("osm", help="add OpenStreetMap schools (needs internet)").set_defaults(func=cmd_osm)
     p = sub.add_parser("crawl", help="read school websites for emails, phones and heads (needs internet)")
     p.add_argument("--limit", type=int)

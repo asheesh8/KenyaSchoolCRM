@@ -54,35 +54,47 @@ DEFAULT_TEMPLATES = [
      "subject": "A free Bible library for {{school}}",
      "body": """{{greeting}}
 
-My name is {{sender_name}}, and I work with {{org}}. We partner with schools across Sierra Leone to give pupils and teachers free access to a library of Bibles and Bible-based reading materials.
+My name is {{sender_name}}, and I'm with {{org}}. We work with schools across Sierra Leone to give pupils and teachers free access to a library of Bibles and Bible-based reading materials.
 
-I'm writing to introduce our initiative and to ask whether {{school}} would be open to hearing more. There is no cost to the school.
+I'd love to share it with {{school}}. Teachers use it in Religious and Moral Education lessons, morning devotion and assemblies, and in school fellowships and clubs. There is no cost to the school and nothing to sign.
 
-Are you the right person to speak with about this, or could you point me to the best contact?
+Are you the right person to speak with about this? If not, could you point me to the best contact?
 
 With thanks,
 {{signature}}"""},
     {"step": 2, "name": "Library offer", "delay_days": 4, "subject": "",
      "body": """{{greeting}}
 
-Following up on my note: we would like to share our library with {{school}}, free of charge. It includes Bibles and reading materials that teachers can use in class, in assemblies and in school clubs.
+I'm following up on my note about the free library for {{school}}.
 
-You can see what's included here: {{library_link}}
+It includes Bibles and Bible-based readers, stories and study materials for different ages, which teachers can use in class, in devotion and in clubs. You can see what's included here: {{library_link}}
 
-If this would be useful, just reply with roughly how many pupils and teachers you have, and we'll arrange access for your school.
+If it would be useful, just reply with roughly how many pupils and teachers you have, and we'll arrange access for your school.
 
 Warm regards,
 {{signature}}"""},
     {"step": 3, "name": "Follow-up", "delay_days": 7, "subject": "",
      "body": """{{greeting}}
 
-I wanted to try once more in case my earlier emails were missed. Our offer of a free library for {{school}} still stands, and we're happy to work around your school calendar.
+I'm trying once more in case my earlier emails were missed. Our offer of a free Bible library for {{school}} still stands, and we're happy to work around your school calendar.
 
-If now isn't a good time, just let me know and I won't write again.
+If someone else at the school looks after this, I'd be grateful if you could pass it on. And if now isn't a good time, just let me know and I won't write again.
 
 Blessings,
 {{signature}}"""},
 ]
+
+# Most schools have a phone but no email: these open in WhatsApp or the phone's SMS app from the school panel.
+DEFAULT_PHONE_MESSAGES = {
+    "whatsapp_message": """{{hello}} my name is {{sender_name}} from {{org}}. We're giving schools in Sierra Leone a free library of Bibles and Bible-based reading materials for pupils and teachers, at no cost to the school.
+
+I'd love to share it with {{school}}. You can see what's included here: {{library_link}}
+
+Are you the right person to talk to about this? If not, who should I contact? Thank you, and God bless.""",
+    "sms_message": "{{hello}} this is {{sender_name}} from {{org}}. We'd like to give {{school}} a free Bible library "
+                   "for pupils and teachers. May I send you the details by WhatsApp or email? Reply STOP and we "
+                   "won't contact you again.",
+}
 
 UNSUB_WORDS = re.compile(r"\b(unsubscribe|stop|remove me|take me off|do not (contact|email)|no more emails?)\b", re.I)
 BOUNCE_FROM = re.compile(r"(mailer-daemon|postmaster|mail delivery)", re.I)
@@ -179,6 +191,8 @@ def settings(conn):
     return {"org": db.get_meta(conn, "org_name", "") or "our ministry",
             "library_link": db.get_meta(conn, "library_link", "") or "",
             "weekdays_only": db.get_meta(conn, "weekdays_only", "1") == "1",
+            "phone_sender": db.get_meta(conn, "phone_sender", "") or "",
+            **{k: db.get_meta(conn, k, "") or v for k, v in DEFAULT_PHONE_MESSAGES.items()},
             "sending": db.get_meta(conn, "sending", "0") == "1"}
 
 
@@ -198,6 +212,17 @@ def greeting(person, role):
 
 def render(text, ctx):
     return re.sub(r"\{\{\s*(\w+)\s*\}\}", lambda m: str(ctx.get(m.group(1), "") or ""), text or "")
+
+
+def phone_messages(conn, school):
+    """WhatsApp and SMS text for one school, addressed to its named head when there is one."""
+    s = settings(conn)
+    person = (school["leader"] or "").split(" (")[0]
+    hello = greeting(person, None).replace("Dear ", "Good day ") if person else "Good day,"
+    ctx = {"hello": hello, "school": school["name"], "person": person, "district": school["district"] or "",
+           "town": school["town"] or "", "sender_name": s["phone_sender"] or "[your name]",
+           "org": s["org"], "library_link": s["library_link"] or "[library link]"}
+    return {"whatsapp": render(s["whatsapp_message"], ctx), "sms": render(s["sms_message"], ctx)}
 
 
 def context(conn, acc, school, enr):

@@ -138,6 +138,7 @@ def api_school(sid):
     sup = {x[0] for x in c.execute("SELECT email FROM suppressions")}
     for k in d["contacts"]:
         k["suppressed"] = k["kind"] == "email" and k["value"] in sup
+    d["phone_messages"] = mailer.phone_messages(c, r)
     return d
 
 
@@ -656,9 +657,12 @@ class Handler(BaseHTTPRequestHandler):
             if path == "send/tick":
                 return self._send(200, mailer.tick(c))
             if path == "settings":
-                for k in ("org_name", "library_link"):
+                for k in ("org_name", "library_link", "phone_sender"):
                     if k in body:
                         db.set_meta(c, k, str(body[k])[:500])
+                for k in mailer.DEFAULT_PHONE_MESSAGES:
+                    if k in body:
+                        db.set_meta(c, k, str(body[k])[:2000])
                 if "weekdays_only" in body:
                     db.set_meta(c, "weekdays_only", "1" if body["weekdays_only"] else "0")
                 return self._send(200, api_outreach())

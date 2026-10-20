@@ -324,11 +324,17 @@
     try { renderDrawer(await api(`schools/${id}`)); } catch (e) { d.innerHTML = `<div class="d-head">${esc(e.message)}</div>`; }
   }
   function closeDrawer() { state.open = null; $("#drawer").hidden = true; }
+  function phoneLinks(value, msgs) {
+    const num = value.replace(/[^\d+]/g, ""), wa = num.replace(/\D/g, "");
+    // Sierra Leone mobile prefixes; landlines (22, 23, 31…) can't take WhatsApp.
+    const mobile = /^232(25|3[0-4]|7\d|8[0-8]|99)/.test(wa);
+    return `<a href="tel:${esc(num)}">${esc(value)}</a>${mobile && msgs ? ` <a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent(msgs.whatsapp)}">WhatsApp</a> <a class="btn small" href="sms:${esc(num)}?&body=${encodeURIComponent(msgs.sms)}">Text</a>` : ""}`;
+  }
   function renderDrawer(s) {
     const d = $("#drawer");
     const kinds = ["person", "email", "phone", "website"];
     const contacts = s.contacts.slice().sort((a, b) => kinds.indexOf(a.kind) - kinds.indexOf(b.kind) || b.active - a.active);
-    const val = (c) => c.kind === "email" ? `<a href="mailto:${esc(c.value)}">${esc(c.value)}</a>` : c.kind === "phone" ? `<a href="tel:${esc(c.value.replace(/\s/g, ""))}">${esc(c.value)}</a>`
+    const val = (c) => c.kind === "email" ? `<a href="mailto:${esc(c.value)}">${esc(c.value)}</a>` : c.kind === "phone" ? phoneLinks(c.value, s.phone_messages)
       : c.kind === "website" ? `<a href="${esc(c.value)}" target="_blank" rel="noopener">${esc(c.value.replace(/^https?:\/\//, ""))}</a>` : esc(c.value);
     d.innerHTML = `
       <div class="d-head"><div class="d-top">
@@ -443,6 +449,13 @@
         ${o.public_url ? "" : `<p class="muted small">Set PUBLIC_URL (the CRM's web address) to add a one-click unsubscribe link. Until then the footer asks people to reply "unsubscribe", and replies are caught when you check replies.</p>`}
       </div>
 
+      <div class="card"><h2>WhatsApp and text messages</h2>
+        <p class="sub">Most schools have a phone number but no email. Open a school and press <b>WhatsApp</b> or <b>Text</b> next to its number: the message below opens ready to send from your phone or WhatsApp Web. Placeholders: {{hello}} (“Good day Mrs Kamara,” or “Good day,”) {{school}} {{person}} {{district}} {{town}} {{sender_name}} {{org}} {{library_link}}.</p>
+        <div class="settings-row"><label class="field">Your name<input id="p-sender" value="${esc(o.settings.phone_sender)}" placeholder="e.g. Ashish"></label></div>
+        <label class="field">WhatsApp message<textarea rows="7" id="p-wa">${esc(o.settings.whatsapp_message)}</textarea></label>
+        <label class="field">Text message (keep it short)<textarea rows="3" id="p-sms">${esc(o.settings.sms_message)}</textarea></label>
+        <button class="btn small" id="p-save">Save messages</button></div>
+
       <div class="grid-2">
         <div class="card"><h2>Next up</h2><p class="sub">Who gets which email next.</p>
           ${o.upcoming.length ? `<table class="plain"><tbody>${o.upcoming.map((e) => `<tr><td><a href="#" data-open="${e.school_id}">${esc(e.school)}</a><div class="s-sub">${esc(e.email)}</div></td><td>Email ${e.next_step}</td><td>${esc(e.account || "")}</td><td class="num">${until(e.next_due_at) === "now" ? "due" : "in " + until(e.next_due_at)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Nobody in the sequence yet. Select schools on <a href="#/schools?has=email">Find schools</a> and press “Email selected”.</p>`}</div>
@@ -472,6 +485,7 @@
     }));
     $$("[data-pause]", el).forEach((b) => b.addEventListener("click", async () => { await api(`accounts/${b.dataset.pause}`, { method: "PATCH", body: { enabled: +b.dataset.to } }); renderOutreach(); }));
     $("#s-save").onclick = async () => { await api("settings", { method: "POST", body: { org_name: $("#s-org").value, library_link: $("#s-link").value, weekdays_only: $("#s-weekdays").checked } }); toast("Saved"); };
+    $("#p-save").onclick = async () => { await api("settings", { method: "POST", body: { phone_sender: $("#p-sender").value, whatsapp_message: $("#p-wa").value, sms_message: $("#p-sms").value } }); toast("Messages saved"); };
     $$("[data-save-t]", el).forEach((b) => b.addEventListener("click", async () => {
       const step = b.dataset.saveT, body = {};
       $$(`[data-t="${step}"]`, el).forEach((i) => (body[i.dataset.f] = i.value));

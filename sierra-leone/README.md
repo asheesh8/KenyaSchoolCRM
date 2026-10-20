@@ -39,12 +39,15 @@ The research ran from a sandbox that could only read web pages one at a time. On
 
 ```bash
 python3 -m slcrm mbsse    # the Ministry's published school lists (fee-subsidy schedules): EMIS, chiefdom, town, headcount
+python3 -m slcrm schoollist  # the Ministry's 2016/2017 EMIS school-list PDFs: a phone number for nearly every school
 python3 -m slcrm osm      # OpenStreetMap schools with coordinates and any phone / email / website on the map
 python3 -m slcrm crawl    # reads every known school website for emails, +232 phones and named heads (robots.txt honoured)
 python3 -m slcrm stats    # coverage by level and district, against the 2024/25 school census
 ```
 
 `python3 -m slcrm merge --raw <folder>` rebuilds `dataset/` from research files in the format of `dataset/SCHEMA.md` (the project's research lives in `/mnt/project-files/sierra-leone-schools/raw/`).
+
+`schoollist` needs `pdftotext` (`brew install poppler` on a Mac, `apt install poppler-utils` on Linux) or `pip install pypdf`. It adds the phones straight into your CRM and writes `data/schoollist.jsonl`; share that file back to the project folder so it can be merged into the shared dataset. The phones date from 2016/17, so expect some to be out of date.
 
 Worth requesting by email (all mentioned in the research notes): MBSSE's master school list at `schoollist.mbsse.gov.sl` (13,788 schools with EMIS codes and GPS, partner access), and each district's Deputy Director of Education for their head-teacher contact lists.
 
@@ -108,6 +111,10 @@ python3 -m slcrm replies      # check every inbox now
 ```
 
 The local server (`serve`) also sends in the background while the switch is on. On Vercel there's no background process, so keep the Outreach page open while sending.
+
+## WhatsApp and text messages
+
+Most schools have a phone number but no email. In a school's panel, every mobile number has **WhatsApp** and **Text** buttons that open the message ready to send (WhatsApp Web or the app on a computer, the SMS app on a phone). Set your name and edit both messages under **Email outreach → WhatsApp and text messages**. Placeholders: `{{hello}}` ("Good day Mrs Kamara," or "Good day,"), `{{school}}`, `{{person}}`, `{{district}}`, `{{town}}`, `{{sender_name}}`, `{{org}}`, `{{library_link}}`. Nothing is sent automatically. Change the school's stage after you send, and mark anyone who replies STOP as **Do not contact**.
 
 ## Before contacting schools
 
