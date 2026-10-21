@@ -1,0 +1,6 @@
+data/
+.env
+# Country data stays out of this public repository (it names head teachers and officials).
+# It lives in the project folder; copy it here or pass --file to `load`.
+dataset/*
+!dataset/DATA-FORMAT.md

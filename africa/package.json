@@ -1,0 +1,13 @@
+{
+  "name": "africa-schools-crm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One CRM for schools in Kenya, Sierra Leone and Uganda: directory, 7-account email sequences and a WhatsApp queue.",
+  "scripts": {
+    "dev": "python3 -m africacrm serve",
+    "load": "python3 -m africacrm load",
+    "send": "python3 -m africacrm send",
+    "stats": "python3 -m africacrm stats",
+    "test": "python3 -m unittest discover tests"
+  }
+}

@@ -1,5 +1,7 @@
 # Kenya Schools Directory
 
+> **Outreach for Kenya, Sierra Leone and Uganda now lives in one CRM: [`africa/`](africa/README.md).** This folder still builds the Kenya directory and runs the live Kenya site.
+
 A database of every school in Kenya, from nursery (PP1) to university, with a simple CRM for contacting them.
 
 - **Harvester** (`harvest/`): builds the directory from public sources. It then finds each school's website and reads it for emails, phone numbers, P.O. Box addresses, and the principal's or head teacher's name.
