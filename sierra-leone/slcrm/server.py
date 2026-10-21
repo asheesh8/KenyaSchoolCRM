@@ -560,13 +560,14 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def _body(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        if not n:
-            return {}
-        try:
-            return json.loads(self.rfile.read(n))
-        except ValueError:
-            return {}
+        """The JSON body, read once: a second read would wait forever on a kept-alive connection."""
+        if not hasattr(self, "_json"):
+            n = int(self.headers.get("Content-Length") or 0)
+            try:
+                self._json = json.loads(self.rfile.read(n)) if n else {}
+            except ValueError:
+                self._json = {}
+        return self._json if isinstance(self._json, dict) else {}
 
     def _params(self):
         return {k: v[-1] for k, v in parse_qs(urlsplit(self.path).query).items()}

@@ -1,5 +1,7 @@
 # Sierra Leone Schools Directory
 
+> Superseded for outreach by the combined [Africa Schools CRM](../africa/README.md), which loads this country's data file. This folder still builds the Sierra Leone dataset.
+
 A directory of Sierra Leone's schools, colleges and education offices, with a small CRM and a three-email outreach sequence you send from up to seven of your own mailboxes. It is the Sierra Leone counterpart of the Kenya directory in the parent folder, built the same way: plain Python 3 (standard library only), one SQLite file, and a static front end with no build step.
 
 ## Quick start
