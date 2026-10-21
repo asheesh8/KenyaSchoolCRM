@@ -1,0 +1,5 @@
+data/
+# The merged contact data stays out of this public repository (it names people).
+# It lives in the project folder (/mnt/project-files/uganda-schools/); point UG_DATASET_DIR at it.
+dataset/*
+!dataset/SCHEMA.md
